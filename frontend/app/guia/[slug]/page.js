@@ -1,5 +1,6 @@
 // app/guia/[slug]/page.js
-import { createClient } from "@/utils/supabase/server";
+import { createClient as createServerClient } from "@/utils/supabase/server"; // Renamed import for clarity
+import { createBuildClient } from "@/utils/supabase/build-client"; // <-- Import Build Client
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import Link from "next/link";
@@ -8,94 +9,92 @@ import GuideSidebar from '@/components/GuideSidebar';
 
 // --- FUNCIONES DE OBTENCIÓN DE DATOS ---
 
-// Función para obtener todos los slugs y títulos ordenados (para Sidebar, Nav, generateStaticParams)
+// Función para obtener todos los slugs y títulos ordenados (para Sidebar, Nav)
+// USES SERVER CLIENT (runs within request scope)
 async function getAllSectionsMetadata() {
-    const supabase = createClient();
+    const supabase = createServerClient(); // Regular server client
     const { data: allSections, error: allError } = await supabase
         .from("guide_sections")
-        .select("title, slug, order_index") // Seleccionar solo lo necesario
+        .select("title, slug, order_index")
         .order("order_index", { ascending: true });
     if(allError) {
         console.error("Error fetching all sections metadata:", allError);
-        return []; // Devolver vacío en caso de error
+        return [];
     }
     return allSections;
 }
 
 // Función para obtener el contenido de UNA sección específica por slug
+// USES SERVER CLIENT (runs within request scope)
 async function getCurrentSectionContent(slugParam) {
-  const supabase = createClient();
+  const supabase = createServerClient(); // Regular server client
   const { data: currentSectionData, error: currentError } = await supabase
     .from("guide_sections")
-    .select("title, content") // Solo title y content
+    .select("title, content")
     .eq("slug", slugParam)
     .single();
 
   if (currentError || !currentSectionData) {
      console.error("Error fetching current section content for slug:", slugParam, currentError);
-     return null; // Devolver null si no se encuentra o hay error
+     return null;
   }
   return currentSectionData;
 }
 
 // --- FIN FUNCIONES ---
 
-// --- generateStaticParams: Le dice a Next.js qué slugs existen en build time ---
+// --- generateStaticParams: USES BUILD CLIENT ---
 export async function generateStaticParams() {
-  // Obtener todos los slugs para pre-renderizar las páginas
-  console.log("Generating static params for guide slugs..."); // Log para depuración
-  const sections = await getAllSectionsMetadata(); // Reutilizar la función
+  // Use the build-specific client that DOES NOT call cookies()
+  const supabaseBuild = createBuildClient();
+  console.log("Generating static params using build client...");
 
-  if (!sections || sections.length === 0) {
-    console.warn("No sections found for generateStaticParams.");
+  const { data: sections, error } = await supabaseBuild // <-- Use build client
+    .from("guide_sections")
+    .select('slug');
+
+  if (error || !sections) {
+    console.error("Error fetching slugs for generateStaticParams:", error);
     return [];
   }
 
-  // Mapear al formato requerido: [{ slug: '...' }, { slug: '...' }]
   const params = sections.map((section) => ({
     slug: section.slug,
   }));
-  console.log("Params generated:", params); // Log para depuración
+  console.log("Params generated:", params.length);
   return params;
 }
 // --- FIN generateStaticParams ---
 
 
 // --- Componente principal de la página ---
+// USES SERVER CLIENT (runs within request scope)
 export default async function GuiaSectionPage({ params }) {
   const slug = params.slug;
 
-  // Obtener todas las secciones para Sidebar y navegación prev/next
+  // Fetch data needed for the page using the standard server client
   const allSections = await getAllSectionsMetadata();
-  // Obtener el contenido de la sección actual
   const currentSectionContent = await getCurrentSectionContent(slug);
 
-  // Si no se encontró el contenido de la sección actual
   if (!currentSectionContent) {
     notFound();
   }
 
-  // Encontrar índice actual y secciones prev/next
+  // Find prev/next using the metadata fetched
   const currentIndex = allSections.findIndex(sec => sec.slug === slug);
   const prevSection = currentIndex > 0 ? allSections[currentIndex - 1] : null;
   const nextSection = currentIndex < allSections.length - 1 ? allSections[currentIndex + 1] : null;
 
-  // Combinar título (de metadata) con contenido
   const currentSection = {
-      ...currentSectionContent, // title, content
-      slug: slug // Asegurar que el slug esté presente
+      ...currentSectionContent,
+      slug: slug
   };
 
-
   return (
-    // Contenedor Flex principal
-    <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-      {/* Sidebar recibe allSections (metadata) */}
+    // ... (JSX sin cambios, sigue usando currentSection, allSections, prevSection, nextSection) ...
+     <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
       <GuideSidebar sections={allSections} currentSlug={slug} />
-
-      {/* Contenido Principal */}
       <div className="flex-1 min-w-0">
-        {/* Contenedor blanco con padding */}
         <div className="page-container">
           <Link
             href="/guia"
@@ -103,13 +102,9 @@ export default async function GuiaSectionPage({ params }) {
           >
             &larr; Volver al índice
           </Link>
-
-          {/* Título principal */}
           <h1 className="mb-6 font-bold text-gray-900 font-heading">
             {currentSection.title}
           </h1>
-
-          {/* Artículo con estilos prose */}
           <article className="prose prose-sm md:prose-base lg:prose-lg max-w-prose">
             {currentSection.content && (
               <ReactMarkdown remarkPlugins={[remarkGfm]}>
@@ -117,8 +112,6 @@ export default async function GuiaSectionPage({ params }) {
               </ReactMarkdown>
             )}
           </article>
-
-          {/* Botones de Navegación */}
           <div className="flex flex-col sm:flex-row justify-between mt-10 pt-6 border-t border-gray-200 gap-4 text-sm max-w-prose">
             <div className="text-center sm:text-left">
               {prevSection && (
@@ -142,10 +135,10 @@ export default async function GuiaSectionPage({ params }) {
 }
 
 // --- generateMetadata ---
+// USES SERVER CLIENT (runs within request scope during generation)
 export async function generateMetadata({ params }) {
   const slug = params.slug;
-  // Obtener solo el contenido necesario para el título
-  const sectionContent = await getCurrentSectionContent(slug);
+  const sectionContent = await getCurrentSectionContent(slug); // Uses standard server client
 
   if (!sectionContent) {
     return { title: "Sección no encontrada" };
