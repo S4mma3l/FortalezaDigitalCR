@@ -1,5 +1,5 @@
 import os
-from fastapi import FastAPI, UploadFile, File, Form, Depends, HTTPException, status, Request
+from fastapi import FastAPI, UploadFile, File, Form, Depends, HTTPException, status, Request, BackgroundTasks # <-- Añadido BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from PIL import Image
@@ -48,7 +48,8 @@ if not SMTP_SERVER or not EMAIL_SENDER or not EMAIL_PASSWORD or not ADMIN_EMAIL_
 app = FastAPI( title="Fortaleza Digital CR - API", description="Backend para el portal de ciberseguridad de Costa Rica.")
 origins = [
     "http://localhost:3000",
-    "https://s4mma3l.github.io", # Agrega tu URL de producción aquí si es necesario
+    "https://s4mma3l.github.io", # URL de GitHub Pages
+    # "https://tu-dominio-real.com", # Si tienes dominio propio
 ]
 app.add_middleware(
     CORSMiddleware,
@@ -172,11 +173,12 @@ async def analizar_phishing(texto_usuario: str = Form(...)):
         return {"error": f"Error al contactar la IA: {str(e)}"}, 500
 
 
-# --- Endpoint para Eliminar Cuenta (CORREGIDO) ---
+# --- Endpoint para Eliminar Cuenta (con BackgroundTasks) ---
 @app.delete("/api/user/delete")
-async def delete_user_account(current_user: dict = Depends(get_current_user)):
+# --- Añadir BackgroundTasks como dependencia ---
+async def delete_user_account(background_tasks: BackgroundTasks, current_user: dict = Depends(get_current_user)):
     """
-    Elimina la cuenta del usuario autenticado actual y envía notificación al admin.
+    Elimina la cuenta del usuario autenticado actual y envía notificación al admin EN SEGUNDO PLANO.
     """
     user_id = current_user.get('id')
     user_email = current_user.get('email')
@@ -187,30 +189,30 @@ async def delete_user_account(current_user: dict = Depends(get_current_user)):
     print(f"Solicitud para eliminar cuenta: Usuario ID={user_id}, Email={user_email}")
 
     try:
-        # --- CORRECCIÓN AQUÍ ---
-        # Cambiar user_id=user_id por id=user_id
-        delete_response = supabase_admin.auth.admin.delete_user(id=user_id)
-        # --- FIN CORRECCIÓN ---
-
-        print(f"Respuesta de Supabase Admin delete_user: {delete_response}") # Loggear respuesta si la hay
+        # Eliminar usuario (sincrónico)
+        delete_response = supabase_admin.auth.admin.delete_user(id=user_id) # Usar id=user_id
+        print(f"Respuesta de Supabase Admin delete_user: {delete_response}")
         print(f"Usuario {user_id} eliminado exitosamente de Supabase Auth.")
 
-        send_deletion_notification(user_email)
+        # --- Añadir envío de email a tareas en segundo plano ---
+        background_tasks.add_task(send_deletion_notification, user_email)
+        # --- FIN Tareas en segundo plano ---
 
-        return {"message": f"Cuenta {user_email} eliminada exitosamente."}
+        return {"message": f"Cuenta {user_email} eliminada exitosamente. Se envió notificación en segundo plano."} # Mensaje actualizado
 
     except Exception as e:
         print(f"Error al eliminar usuario {user_id}: {type(e).__name__} - {e}")
         error_message = str(e)
         if "user not found" in error_message.lower():
              raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="El usuario no existe o ya fue eliminado.")
+        elif isinstance(e, TypeError) and "unexpected keyword argument" in error_message:
+             # Este error específico ya no debería ocurrir con id=user_id, pero lo dejamos por si acaso
+             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error interno: Argumento inesperado al llamar a Supabase. {e}")
         else:
-            # Captura el TypeError específico que vimos antes si ocurre por otra razón
-            if isinstance(e, TypeError) and "unexpected keyword argument" in error_message:
-                 raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error interno: Argumento inesperado al llamar a Supabase. {e}")
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error interno al intentar eliminar la cuenta.")
 
 # --- Función para Enviar Email de Notificación ---
+# Esta función se ejecutará ahora en segundo plano por BackgroundTasks
 def send_deletion_notification(deleted_user_email: str):
     """Envía un correo al administrador notificando la eliminación de una cuenta."""
     if not all([SMTP_SERVER, EMAIL_SENDER, EMAIL_PASSWORD, ADMIN_EMAIL_RECIPIENT]):
@@ -233,18 +235,18 @@ def send_deletion_notification(deleted_user_email: str):
     msg['To'] = ADMIN_EMAIL_RECIPIENT
 
     try:
-        print(f"Intentando enviar notificación de eliminación a {ADMIN_EMAIL_RECIPIENT} usando {SMTP_SERVER}:{SMTP_PORT}...")
+        print(f"BG TASK: Intentando enviar notificación de eliminación a {ADMIN_EMAIL_RECIPIENT}...") # Log para tarea en 2do plano
         with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
             server.ehlo()
             server.starttls()
             server.ehlo()
             server.login(EMAIL_SENDER, EMAIL_PASSWORD)
             server.sendmail(EMAIL_SENDER, ADMIN_EMAIL_RECIPIENT, msg.as_string())
-        print(f"Notificación de eliminación enviada exitosamente para {deleted_user_email}.")
+        print(f"BG TASK: Notificación de eliminación enviada exitosamente para {deleted_user_email}.")
     except smtplib.SMTPAuthenticationError:
-        print(f"ERROR SMTP: Falló la autenticación para {EMAIL_SENDER}. Verifica usuario/contraseña.")
+        print(f"BG TASK ERROR SMTP: Falló la autenticación para {EMAIL_SENDER}. Verifica usuario/contraseña.")
     except Exception as e:
-        print(f"ERROR al enviar notificación de eliminación para {deleted_user_email}: {type(e).__name__} - {e}")
+        print(f"BG TASK ERROR al enviar notificación para {deleted_user_email}: {type(e).__name__} - {e}")
 
 # --- (Comando uvicorn - sin cambios) ---
 # uvicorn main:app --reload --port 8000
