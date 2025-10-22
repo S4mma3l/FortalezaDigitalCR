@@ -2,30 +2,29 @@
 /** @type {import('next').NextConfig} */
 
 // Define el nombre de tu repositorio aquí
-const repoName = 'https://s4mma3l.github.io/FortalezaDigitalCR'; // <-- CAMBIA ESTO AL NOMBRE EXACTO DE TU REPO
+const repoName = 'FortalezaDigitalCR'; // <-- CORRECTO para tu URL
 
+// Determinar si estamos en el entorno de GitHub Actions
 const isGithubActions = process.env.GITHUB_ACTIONS || false;
 
-let assetPrefix = '/';
-let basePath = '';
-
-if (isGithubActions) {
-  // Trim slash if mapRepo exists, and leading slash if not
-  // assetPrefix = `/${repoName}/` // Originalmente así, pero puede causar doble slash
-  // basePath = `/${repoName}` // Originalmente así
-  assetPrefix = `/${repoName}`; // Asegurar un solo slash inicial
-  basePath = `/${repoName}`; // Asegurar un solo slash inicial
-}
-
+// Configurar basePath y assetPrefix SOLO si estamos en GitHub Actions y hay un repoName
+const basePath = isGithubActions && repoName ? `/${repoName}` : '';
+const assetPrefix = isGithubActions && repoName ? `/${repoName}/` : undefined;
 
 const nextConfig = {
   output: 'export', // Habilita la exportación estática
-  // Configurar basePath y assetPrefix para GitHub Pages
+
+  // Aplicar basePath y assetPrefix condicionalmente
   basePath: basePath,
   assetPrefix: assetPrefix,
+
+  // Necesario para 'next export' si usas next/image
   images: {
-    unoptimized: true, // Necesario para 'next export'
+    unoptimized: true,
   },
+
+  // Asegurar que no haya barra final automática
+  trailingSlash: false,
 }
 
 module.exports = nextConfig
