@@ -46,7 +46,7 @@ Este proyecto es un portal web interactivo diseñado para educar y empoderar a l
     ```
 2.  **Configurar Supabase:**
     * Crea un proyecto en [supabase.com](https://supabase.com).
-    * Ve al **SQL Editor** y ejecuta el script SQL completo proporcionado anteriormente para crear las tablas (`guide_sections`, `checklist_items`, etc.) y las políticas RLS.
+    * Ve al **SQL Editor** y ejecuta el script SQL completo y las políticas RLS.
     * Habilita la extensión `pg_net` en **Database -> Extensions**.
     * **Función Edge (Registro IP):**
         * Vincula tu CLI al proyecto: `npx supabase login` y `npx supabase link --project-ref TU_PROJECT_REF`.
