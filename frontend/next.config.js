@@ -2,7 +2,7 @@
 /** @type {import('next').NextConfig} */
 
 // Define el nombre de tu repositorio aquí
-const repoName = 'https://s4mma3l.github.io/FortalezaDigitalCR/'; // <-- CAMBIA ESTO AL NOMBRE EXACTO DE TU REPO
+const repoName = 'https://s4mma3l.github.io/FortalezaDigitalCR'; // <-- CAMBIA ESTO AL NOMBRE EXACTO DE TU REPO
 
 const isGithubActions = process.env.GITHUB_ACTIONS || false;
 
