@@ -48,7 +48,7 @@ if not SMTP_SERVER or not EMAIL_SENDER or not EMAIL_PASSWORD or not ADMIN_EMAIL_
 app = FastAPI( title="Fortaleza Digital CR - API", description="Backend para el portal de ciberseguridad de Costa Rica.")
 origins = [
     "http://localhost:3000",
-    # "https://tu-dominio-real.com", # Agrega tu URL de producción aquí si es necesario
+    "https://s4mma3l.github.io/FortalezaDigitalCR", # Agrega tu URL de producción aquí si es necesario
 ]
 app.add_middleware(
     CORSMiddleware,
