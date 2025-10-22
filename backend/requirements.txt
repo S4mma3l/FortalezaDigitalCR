@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+python-dotenv
+google-generativeai
+pillow
+supabase-client
+python-multipart
+cors-middleware
+pillow-heif
+supabase

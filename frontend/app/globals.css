@@ -1,0 +1,109 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* CAPA BASE */
+@layer base {
+  html {
+    @apply scroll-smooth antialiased text-gray-800;
+    font-size: 16px;
+  }
+  body {
+    /* Fondo gris-50 (blanco roto), texto principal gris-700 */
+    @apply bg-gray-50 font-sans text-base leading-relaxed text-gray-700;
+  }
+  /* Encabezados casi negros, fuente Montserrat */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading font-semibold text-gray-900 leading-tight;
+  }
+  h1 { @apply text-3xl md:text-4xl lg:text-4xl mb-5 mt-3; }
+  h2 { @apply text-2xl md:text-3xl mb-4 mt-10; }
+  h3 { @apply text-xl md:text-2xl mb-3 mt-8; }
+  /* Quitar max-w-prose de los párrafos base */
+  p { @apply mb-4 text-gray-600; }
+  /* Enlaces con color acento teal */
+  a { @apply text-primary no-underline hover:underline hover:text-primary-dark transition-colors duration-150 ease-in-out; }
+  /* Reducir padding base de listas */
+  ul, ol { @apply mb-4 pl-4; }
+  li { @apply mb-1; } /* Reducir margen inferior de li */
+  hr { @apply border-t border-gray-200 my-8; } /* Borde gris claro */
+
+  /* Contenedor de página blanco con sombra */
+  .page-container {
+    @apply p-4 sm:p-6 md:p-10 bg-white rounded-lg shadow-lg; /* Padding ajustado */
+  }
+}
+
+/* CAPA COMPONENTES (Botones sin cambios) */
+@layer components {
+  /* Estilo base común para botones */
+  .btn {
+    @apply inline-block px-6 py-2.5 font-medium text-sm leading-tight uppercase rounded-lg shadow
+           whitespace-nowrap transition-all duration-200 ease-in-out
+           focus:outline-none focus:ring-2 focus:ring-offset-2
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0
+           hover:-translate-y-0.5 hover:shadow-lg
+           focus:-translate-y-0.5 focus:shadow-lg
+           active:translate-y-0 active:shadow-md;
+  }
+  /* Botón Principal (Teal oscuro) */
+  .btn-primary {
+    @apply btn bg-primary text-white hover:bg-opacity-80 focus:ring-primary active:bg-primary-dark active:bg-opacity-100;
+  }
+  /* Botón Secundario (Borde Teal) */
+  .btn-secondary {
+    @apply btn border-2 border-primary text-primary bg-white hover:bg-primary-light hover:border-primary-dark hover:text-primary-dark focus:bg-primary-light focus:ring-primary active:bg-gray-100 active:scale-[0.98];
+  }
+  /* Botón Peligro (Rojo) */
+  .btn-danger {
+     @apply btn bg-red-600 text-white hover:bg-opacity-80 focus:ring-red-500 active:bg-red-700 active:bg-opacity-100;
+  }
+  /* Input Formulario con foco teal */
+  .form-input {
+    @apply w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-150 ease-in-out placeholder-gray-400 text-gray-800;
+  }
+}
+
+/* CAPA UTILIDADES: Estilos Prose alineados a la izquierda */
+@layer utilities {
+  .prose {
+    /* Aplicar max-w-prose PERO SIN mx-auto para alinear a la izquierda */
+    @apply text-sm text-gray-600 max-w-prose leading-relaxed md:text-base;
+    /* Quitar mx-auto si estaba antes */
+    overflow-wrap: break-word; word-wrap: break-word; word-break: break-word;
+    hyphens: auto;
+  }
+  /* Encabezados prose */
+  .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+    @apply font-heading text-gray-900;
+    overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; hyphens: auto;
+  }
+  .prose h3 { @apply text-xl font-semibold mt-10 mb-3 pb-2 border-b border-gray-200; }
+  .prose h4 { @apply text-lg font-semibold mt-8 mb-2; }
+  /* Párrafos prose sin max-w-prose individual */
+  .prose p { @apply my-4; }
+  /* Listas con padding reducido */
+  .prose ul { @apply my-4 pl-4 list-disc marker:text-primary; } /* pl-4 */
+  .prose ol { @apply my-4 pl-4 list-decimal marker:text-primary; } /* pl-4 */
+  /* Quitar padding extra de li */
+  .prose li {
+    @apply mb-1; /* Margen inferior reducido */
+    padding-left: 0; /* Asegurar que no haya padding extra */
+    overflow-wrap: break-word; word-wrap: break-word; word-break: break-word;
+   }
+  .prose li p { @apply my-1; }
+  .prose strong { @apply font-semibold text-gray-900; }
+  .prose a { @apply text-primary font-medium hover:underline hover:text-primary-dark break-words; }
+  .prose code { @apply bg-primary-light text-sm font-mono px-1.5 py-1 rounded text-primary-dark break-words before:content-[''] after:content-['']; overflow-wrap: break-word; word-wrap: break-word; word-break: break-all; hyphens: auto; }
+  .prose pre { @apply bg-gray-900 text-gray-200 p-3 md:p-4 rounded-lg overflow-x-auto my-6 text-xs md:text-sm shadow-md; }
+  .prose pre code { @apply bg-transparent text-inherit p-0 rounded-none whitespace-pre break-normal text-[0.8em]; }
+  /* Cita con padding reducido */
+  .prose blockquote { @apply my-6 px-3 py-2 border-l-4 border-primary bg-primary-light text-gray-700 italic rounded-r-md shadow text-sm md:text-base; }
+  .prose blockquote p { @apply my-1; }
+  .prose > :first-child { @apply mt-0; }
+  .prose > :last-child { @apply mb-0; }
+  .prose img, .prose video { @apply max-w-full my-6 rounded-lg shadow-lg; }
+  .prose table { @apply my-6 w-full text-left border-collapse shadow text-xs md:text-sm; }
+  .prose th { @apply border border-gray-300 px-2 md:px-4 py-2 bg-gray-100 font-semibold text-gray-800; }
+  .prose td { @apply border border-gray-300 px-2 md:px-4 py-2; }
+}

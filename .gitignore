@@ -1,0 +1,76 @@
+# --- Sistema Operativo ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- IDEs y Editores ---
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.sublime-workspace
+*.sublime-project
+.idea/*
+!.idea/misc.xml
+!.idea/modules.xml
+!.idea/workspace.xml
+*~
+*.swp
+*.bak
+*.orig
+
+# --- Archivos de Entorno ---
+# Ignorar todos los archivos .env excepto los de ejemplo
+.env*
+!.env.example
+!.env.sample
+
+# --- Logs ---
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# --- Frontend (Node.js / Next.js) ---
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/dist/
+frontend/.pnp.*
+frontend/.env.local/
+
+# --- Backend (Python / FastAPI) ---
+backend/venv/
+backend/.env/
+backend/__pycache__/
+backend/*.py[cod]
+backend/$PYTHON.cachedir/
+backend/.pytest_cache/
+backend/.mypy_cache/
+backend/.ruff_cache/
+backend/build/
+backend/dist/
+backend/*.egg-info/
+backend/htmlcov/
+backend/.coverage
+backend/.python-version
+
+# --- Supabase CLI ---
+supabase/.temp/
+supabase/generated/ # Si generas tipos o algo similar
+
+# --- Dependencias (global, si aplica) ---
+node_modules/
+# venv/
+# env/
+
+# --- Otros ---
+# Añade aquí cualquier otro archivo o carpeta específica que no quieras subir
+# Por ejemplo, archivos de configuración local, bases de datos de prueba, etc.
+# local_settings.py
+# db.sqlite3
