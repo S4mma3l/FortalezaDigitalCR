@@ -1,5 +1,7 @@
 // This page runs on the server (Server Component)
-import { createClient } from "@/utils/supabase/server"; // Use SERVER client
+// --- CAMBIO IMPORTACIÓN ---
+import { createClient as createBuildClient } from "@/utils/supabase/build-client";
+// --- FIN CAMBIO ---
 
 export const metadata = {
   title: "Directorio de Ayuda | Fortaleza Digital CR",
@@ -7,7 +9,9 @@ export const metadata = {
 };
 
 export default async function DirectorioAyudaPage() {
-  const supabase = createClient();
+  // --- CAMBIO CLIENTE ---
+  const supabase = createBuildClient();
+  // --- FIN CAMBIO ---
 
   // Fetch contacts from Supabase, ordered by entity name
   const { data: contacts, error } = await supabase
@@ -17,15 +21,15 @@ export default async function DirectorioAyudaPage() {
 
   if (error) {
     console.error("Error fetching emergency contacts:", error);
-    // Handle error display if needed
   }
 
   return (
-    <div className="p-6 md:p-8 bg-white rounded-lg shadow-md">
-      <h1 className="mb-6 text-3xl font-bold text-blue-700">
+    // Aplicar .page-container
+    <div className="page-container">
+      <h1 className="mb-6">
         Directorio de Ayuda y Denuncias
       </h1>
-      <p className="mb-8 text-lg text-gray-700">
+      <p className="mb-8 text-lg text-gray-700 max-w-prose">
         Contactos clave en Costa Rica para reportar fraudes electrónicos,
         buscar asistencia o realizar denuncias formales.
       </p>
@@ -37,39 +41,27 @@ export default async function DirectorioAyudaPage() {
       )}
 
       {contacts && contacts.length > 0 ? (
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto shadow rounded-lg border border-gray-200"> {/* Añadir sombra y borde */}
           <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+            <thead className="bg-gray-100"> {/* Fondo cabecera más claro */}
               <tr>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Entidad
                 </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Tipo de Contacto
                 </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Información
                 </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Horario
                 </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {contacts.map((contact) => (
-                <tr key={contact.id}>
+                <tr key={contact.id} className="hover:bg-gray-50 transition-colors"> {/* Hover en filas */}
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     {contact.entity_name}
                   </td>
@@ -88,7 +80,7 @@ export default async function DirectorioAyudaPage() {
           </table>
         </div>
       ) : (
-        !error && <p>No hay contactos disponibles en este momento.</p>
+        !error && <p className="text-gray-500 italic">No hay contactos disponibles en este momento.</p>
       )}
     </div>
   );
