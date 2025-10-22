@@ -6,5 +6,4 @@ pillow
 supabase # Ensure this is 'supabase', not 'supabase-client' if you installed 'supabase'
 aiohttp # <-- ADD THIS LINE
 python-multipart
-cors-middleware
 pillow-heif
