@@ -1,7 +1,7 @@
 // This page runs on the server (Server Component)
-// --- CAMBIO IMPORTACIÓN ---
-import { createClient as createBuildClient } from "@/utils/supabase/build-client";
-// --- FIN CAMBIO ---
+// --- CORREGIR IMPORTACIÓN ---
+import { createBuildClient } from "@/utils/supabase/build-client";
+// --- FIN CORRECCIÓN ---
 
 export const metadata = {
   title: "Directorio de Ayuda | Fortaleza Digital CR",
@@ -9,11 +9,10 @@ export const metadata = {
 };
 
 export default async function DirectorioAyudaPage() {
-  // --- CAMBIO CLIENTE ---
+  // --- CORREGIR LLAMADA ---
   const supabase = createBuildClient();
-  // --- FIN CAMBIO ---
+  // --- FIN CORRECCIÓN ---
 
-  // Fetch contacts from Supabase, ordered by entity name
   const { data: contacts, error } = await supabase
     .from("emergency_contacts")
     .select("id, entity_name, contact_type, contact_info, schedule")
@@ -24,7 +23,6 @@ export default async function DirectorioAyudaPage() {
   }
 
   return (
-    // Aplicar .page-container
     <div className="page-container">
       <h1 className="mb-6">
         Directorio de Ayuda y Denuncias
@@ -41,39 +39,23 @@ export default async function DirectorioAyudaPage() {
       )}
 
       {contacts && contacts.length > 0 ? (
-        <div className="overflow-x-auto shadow rounded-lg border border-gray-200"> {/* Añadir sombra y borde */}
+        <div className="overflow-x-auto shadow rounded-lg border border-gray-200">
           <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-100"> {/* Fondo cabecera más claro */}
+            <thead className="bg-gray-100">
               <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Entidad
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Tipo de Contacto
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Información
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Horario
-                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Entidad</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo de Contacto</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Información</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Horario</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {contacts.map((contact) => (
-                <tr key={contact.id} className="hover:bg-gray-50 transition-colors"> {/* Hover en filas */}
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {contact.entity_name}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                    {contact.contact_type}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                    {contact.contact_info}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {contact.schedule}
-                  </td>
+                <tr key={contact.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{contact.entity_name}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{contact.contact_type}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{contact.contact_info}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{contact.schedule}</td>
                 </tr>
               ))}
             </tbody>

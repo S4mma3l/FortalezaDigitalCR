@@ -1,7 +1,8 @@
 // app/guia/[slug]/page.js
-// --- CAMBIO IMPORTACIÓN ---
-import { createClient as createBuildClient } from "@/utils/supabase/build-client";
-// --- FIN CAMBIO ---
+// --- CORREGIR IMPORTACIONES ---
+import { createClient as createServerClient } from "@/utils/supabase/server"; // Keep server client import if needed elsewhere potentially (though maybe not needed now?)
+import { createBuildClient } from "@/utils/supabase/build-client";
+// --- FIN CORRECCIÓN ---
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import Link from "next/link";
@@ -10,9 +11,9 @@ import GuideSidebar from '@/components/GuideSidebar';
 
 // --- FUNCIONES DE OBTENCIÓN DE DATOS USANDO BUILD CLIENT ---
 async function getAllSectionsMetadata() {
-    // --- CAMBIO CLIENTE ---
+    // --- CORREGIR LLAMADA ---
     const supabase = createBuildClient();
-    // --- FIN CAMBIO ---
+    // --- FIN CORRECCIÓN ---
     const { data: allSections, error: allError } = await supabase
         .from("guide_sections")
         .select("title, slug, order_index")
@@ -25,9 +26,9 @@ async function getAllSectionsMetadata() {
 }
 
 async function getCurrentSectionContent(slugParam) {
-  // --- CAMBIO CLIENTE ---
+  // --- CORREGIR LLAMADA ---
   const supabase = createBuildClient();
-  // --- FIN CAMBIO ---
+  // --- FIN CORRECCIÓN ---
   const { data: currentSectionData, error: currentError } = await supabase
     .from("guide_sections")
     .select("title, content")
@@ -42,17 +43,22 @@ async function getCurrentSectionContent(slugParam) {
 }
 // --- FIN FUNCIONES ---
 
-// --- generateStaticParams (YA USA BUILD CLIENT - SIN CAMBIOS) ---
+// --- generateStaticParams (YA USA BUILD CLIENT - SOLO VERIFICAR LLAMADA) ---
 export async function generateStaticParams() {
+  // --- CORREGIR LLAMADA ---
   const supabaseBuild = createBuildClient();
+  // --- FIN CORRECCIÓN ---
   console.log("Generating static params using build client...");
+
   const { data: sections, error } = await supabaseBuild
     .from("guide_sections")
     .select('slug');
+
   if (error || !sections) {
     console.error("Error fetching slugs for generateStaticParams:", error);
     return [];
   }
+
   const params = sections.map((section) => ({ slug: section.slug, }));
   console.log("Params generated:", params.length);
   return params;
@@ -60,7 +66,7 @@ export async function generateStaticParams() {
 // --- FIN generateStaticParams ---
 
 
-// --- Componente principal (USA LAS FUNCIONES ACTUALIZADAS) ---
+// --- Componente principal (Usa las funciones actualizadas) ---
 export default async function GuiaSectionPage({ params }) {
   const slug = params.slug;
 
@@ -78,11 +84,15 @@ export default async function GuiaSectionPage({ params }) {
   const currentSection = { ...currentSectionContent, slug: slug };
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
+    // ... (JSX sin cambios) ...
+     <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
       <GuideSidebar sections={allSections} currentSlug={slug} />
       <div className="flex-1 min-w-0">
         <div className="page-container">
-          <Link href="/guia" className="inline-block mb-4 text-sm text-primary hover:text-primary-dark hover:underline">
+          <Link
+            href="/guia"
+            className="inline-block mb-4 text-sm text-primary hover:text-primary-dark hover:underline"
+          >
             &larr; Volver al índice
           </Link>
           <h1 className="mb-6 font-bold text-gray-900 font-heading">
@@ -109,7 +119,7 @@ export default async function GuiaSectionPage({ params }) {
   );
 }
 
-// --- generateMetadata (USA LAS FUNCIONES ACTUALIZADAS) ---
+// --- generateMetadata (Usa las funciones actualizadas) ---
 export async function generateMetadata({ params }) {
   const slug = params.slug;
   const sectionContent = await getCurrentSectionContent(slug); // Usa buildClient internamente

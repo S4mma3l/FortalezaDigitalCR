@@ -1,9 +1,13 @@
 // This page runs on the server (Server Component)
-import { createClient as createBuildClient } from "@/utils/supabase/build-client"; // <-- Use BUILD client
+// --- CORREGIR IMPORTACIÓN ---
+import { createBuildClient } from "@/utils/supabase/build-client";
+// --- FIN CORRECCIÓN ---
 import Link from "next/link";
 
 export default async function GuiaPage() {
-  const supabase = createBuildClient(); // <-- Use BUILD client instance
+  // --- CORREGIR LLAMADA ---
+  const supabase = createBuildClient();
+  // --- FIN CORRECCIÓN ---
 
   const { data: sections, error } = await supabase
     .from("guide_sections")
@@ -15,10 +19,9 @@ export default async function GuiaPage() {
   }
 
   return (
-    // Aplicar .page-container
     <div className="page-container">
       <h1 className="mb-6">Guía Definitiva de Seguridad</h1>
-      <p className="mb-8 text-lg text-gray-700 max-w-prose"> {/* Limitar ancho del párrafo introductorio */}
+      <p className="mb-8 text-lg text-gray-700 max-w-prose">
         Navega por las secciones de nuestra guía completa para fortalecer
         tu conocimiento y protegerte de las amenazas digitales más comunes
         en Costa Rica.
@@ -36,7 +39,6 @@ export default async function GuiaPage() {
             <li key={section.slug}>
               <Link
                 href={`/guia/${section.slug}`}
-                // Estilos para los enlaces de sección
                 className="block p-4 font-semibold text-gray-800 transition-all duration-200 bg-gray-100 rounded-lg hover:bg-blue-light hover:text-primary hover:shadow-md"
               >
                 {section.title}
