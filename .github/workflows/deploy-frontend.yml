@@ -6,7 +6,7 @@ on:
     branches:
       - main # O tu rama principal
     paths:
-      - 'frontend/**' # Solo si cambia el frontend
+      - 'frontend/**'
   workflow_dispatch:
 
 permissions:
@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./frontend # Ejecutar en la carpeta frontend
+        working-directory: ./frontend
 
     steps:
       - name: Checkout code
@@ -32,7 +32,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18' # O tu versión
+          node-version: '20' # <-- CAMBIAR A 20 o superior
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
@@ -41,11 +41,10 @@ jobs:
 
       - name: Build static site
         env:
-          # Pasar secretos como variables de entorno al build
           NEXT_PUBLIC_API_URL: ${{ secrets.RAILWAY_BACKEND_URL }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-        run: npm run build # Ejecutará 'next build' y 'next export'
+        run: npm run build
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -53,7 +52,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./frontend/out # Carpeta de salida estática
+          path: ./frontend/out
 
       - name: Deploy to GitHub Pages
         id: deployment
